@@ -1,0 +1,27 @@
+{
+  "name": "perseus-reader",
+  "version": "0.0.1",
+  "description": "",
+  "main": "server.coffee",
+  "scripts": {
+    "start": "coffee ./lib/server.coffee",
+    "test": "mocha --recursive --compilers coffee:coffee-script"
+  },
+  "dependencies": {
+    "express"        : "3.2.x",
+    "coffee-script"  : "1.6.x",
+    "libxmljs"       : "0.8.x",
+    "ejs"            : "0.8.x",
+    "perseus-util"   : "0.0.x"
+  },
+  "devDependencies": {
+    "supertest": "0.7.x"
+  },
+  "engines": {
+    "node": "0.10.x",
+    "npm": "1.2.x"
+  },
+  "repository": "",
+  "author": "Nick Kallen",
+  "license": "MIT"
+}
