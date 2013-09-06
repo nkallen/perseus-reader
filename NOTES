@@ -1,0 +1,53 @@
+###
+  update: (req, res) ->
+    self = this
+    text = req.text
+
+    for key, value of req.body.path
+      node = text.document.get(unescape(key))
+      replacement = libxml.parseXml(value).root()
+      node.addNextSibling(replacement)
+      node.remove()
+
+    ctsIndex.urn(text.metadata.urn, text, (err) ->
+      return res.send(500) if err
+
+      res.render('text',
+        edition: new Edition(text.metadata.citationMapping, text.passageSelector, req.annotator, text.document),
+        urn: req.urn
+        features: util.greek.Features))
+
+  annotations:
+    show: (req, res) ->
+      annotator = req.annotator
+      res.json(annotator.toJson())
+
+    update: (req, res) ->
+      text = req.text
+      annotator = req.annotator
+      annotator.update(req.params.id, req.body)
+      annotatorRepository.pid(text.metadata.pid, annotator, (err) ->
+        return res.send(500) if err
+
+        res.render('text',
+          edition: new Edition(text.metadata.citationMapping, text.passageSelector, req.annotator, text.document),
+          urn: req.urn
+          features: util.greek.Features))
+
+
+app.param('urn', (req, res, next, urn) ->
+  if /^(urn:cts:[^\/]+)/.test(urn)
+    req.params.urn = urn
+    next()
+  else
+    next('route'))
+
+#  app.get('/:group/:work/:edition\::passageSelector', [text.loadGroup, text.loadWork, text.loadEdition], text.edition)
+app.param('passageSelector', (req, res, next, urn) ->
+  if /(\d+\.)*\d+/.test(urn)
+    req.params.urn = urn
+    next()
+  else
+    next('route'))
+
+###

@@ -1,0 +1,9 @@
+[submodule "vendor/catalog_data"]
+	path = vendor/catalog_data
+	url = https://github.com/PerseusDL/catalog_data.git
+[submodule "vendor/treebank"]
+	path = vendor/treebank
+	url = https://github.com/nkallen/treebank.git
+[submodule "vendor/canonical"]
+	path = vendor/canonical
+	url = https://github.com/nkallen/canonical.git

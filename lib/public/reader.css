@@ -1,0 +1,44 @@
+body {
+  line-height: 25px;
+}
+
+body, h1, h2, h3, h4 {
+  font-family: 'Cardo', serif;
+}
+
+.highlight {
+  margin: -1px -4px -2px;
+  padding: 1px 4px 2px;
+  color: #fff;
+  border-radius: 3px;
+  background-color: #999;
+}
+
+.parent {
+  background-color: #d9534f;
+  border-color: #d43f3a;
+}
+
+.child, .pivot {
+  background-color: #3276b1;
+  border-color: #285e8e
+}
+
+div.line:hover a.line-number.has-commentary:not(.highlight) {
+  padding: 0px 7px;
+  cursor: pointer;
+  border: 1px solid gray;
+}
+
+div.line:hover a.line-number:not(.highlight) {
+  visibility: visible !important;
+}
+
+a.line-number:not(.highlight) {
+  visibility: hidden;
+  color: gray;
+}
+
+div.paragraph {
+  margin-bottom: 15px;
+}

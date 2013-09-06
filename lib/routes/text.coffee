@@ -3,32 +3,51 @@ fs = require('fs')
 libxml = require('libxmljs')
 TreebankAnnotator = util.annotator.TreebankAnnotator
 SimpleAnnotator = util.annotator.SimpleAnnotator
-Edition = util.Edition
+AnnotatedEdition = util.AnnotatedEdition
 
-module.exports = (ctsIndex, perseusRepository, annotatorRepository) ->
+module.exports =
+  loadIndex: (req, res, next) ->
+    res.locals.ctsIndex = req.ctsIndex = req.app.get('ctsIndex')
+    next()
+
   loadGroup: (req, res, next) ->
-    return res.send(404) unless req.group = ctsIndex.group(req.params.group)
+    unless res.locals.group = req.group = req.ctsIndex.group(req.params.group)
+      return res.send(404)
     next()
 
   loadWork: (req, res, next) ->
-    return res.send(404) unless req.work = ctsIndex.work(req.params.group, req.params.work)
+    unless res.locals.work = req.work = req.ctsIndex.work(req.params.group, req.params.work)
+      return res.send(404) 
     next()
 
   loadEdition: (req, res, next) ->
-    return res.send(404) unless req.work = ctsIndex.edition(req.params.group, req.params.work, req.params.edition)
-    req.params.urn = req.work.urn
+    unless res.locals.edition = req.edition = req.ctsIndex.edition(req.params.group, req.params.work, req.params.edition)
+      return res.send(404)
+
+    res.locals.urn = req.params.urn = req.edition.urn
     next()
 
   loadUrn: (req, res, next) ->
-    return res.send(404) unless req.work = ctsIndex.urn(req.params.urn)
+    unless res.locals.edition = req.edition = req.index.urn(req.params.urn)
+      return res.send(404) 
     next()
 
   loadAnnotator: (req, res, next) ->
-    annotatorRepository.urn(req.params.urn, (error, annotator) ->
+    req.app.get('annotatorRepository').urn(req.params.urn, (error, annotator) ->
       return res.send(500) if error
       req.annotator = annotator
       next()
     )
+
+  loadText: (req, res, next) ->
+    req.app.get('perseusRepository').urn(req.params.urn, (error, text) ->
+      return res.send(404) if error
+      req.text = libxml.parseXml(text)
+      next()
+    )
+
+  index: (req, res) ->
+    res.render('index')
   
   group: (req, res) ->
     res.render('group')
@@ -37,45 +56,6 @@ module.exports = (ctsIndex, perseusRepository, annotatorRepository) ->
     res.render('work')
 
   edition: (req, res) ->
-    text = req.text
-    res.render('text',
-      edition: new Edition(req.edition.citationMapping, text.passageSelector, req.annotator, req.text),
-      urn: req.urn
+    res.render('edition',
+      annotatedEdition: AnnotatedEdition.make(req.edition.citationMapping, req.params.passageSelector, req.annotator, req.text),
       features: util.greek.Features)
-
-###
-  update: (req, res) ->
-    self = this
-    text = req.text
-
-    for key, value of req.body.path
-      node = text.document.get(unescape(key))
-      replacement = libxml.parseXml(value).root()
-      node.addNextSibling(replacement)
-      node.remove()
-
-    ctsIndex.urn(text.metadata.urn, text, (err) ->
-      return res.send(500) if err
-
-      res.render('text',
-        edition: new Edition(text.metadata.citationMapping, text.passageSelector, req.annotator, text.document),
-        urn: req.urn
-        features: util.greek.Features))
-
-  annotations:
-    show: (req, res) ->
-      annotator = req.annotator
-      res.json(annotator.toJson())
-
-    update: (req, res) ->
-      text = req.text
-      annotator = req.annotator
-      annotator.update(req.params.id, req.body)
-      annotatorRepository.pid(text.metadata.pid, annotator, (err) ->
-        return res.send(500) if err
-
-        res.render('text',
-          edition: new Edition(text.metadata.citationMapping, text.passageSelector, req.annotator, text.document),
-          urn: req.urn
-          features: util.greek.Features))
-###
