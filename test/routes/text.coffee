@@ -34,5 +34,5 @@ describe 'repos', ->
   describe 'edition', ->
     it 'works', (done) ->
       request(app)
-        .get('/Homer/Iliad/Iliad')
+        .get('/Homer/Iliad/Iliad:1')
         .expect(200, done)

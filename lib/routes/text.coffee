@@ -34,8 +34,11 @@ module.exports =
 
   loadAnnotator: (req, res, next) ->
     req.app.get('annotatorRepository').urn(req.params.urn, (error, annotator) ->
-      return res.send(500) if error
-      req.annotator = annotator
+      req.annotator =
+        if error
+          new SimpleAnnotator
+        else
+          annotator
       next()
     )
 
@@ -45,6 +48,15 @@ module.exports =
       req.text = libxml.parseXml(text)
       next()
     )
+
+  loadSelection: (req, res, next) ->
+    annotatedEdition = new AnnotatedEdition(req.edition.citationMapping, req.annotator, req.text)
+    res.locals.selection = req.selection =
+      if req.params.passageSelector
+        annotatedEdition.select(req.params.passageSelector)
+      else
+        annotatedEdition.selectFirst()
+    next()
 
   index: (req, res) ->
     res.render('index')
@@ -56,6 +68,4 @@ module.exports =
     res.render('work')
 
   edition: (req, res) ->
-    res.render('edition',
-      annotatedEdition: AnnotatedEdition.make(req.edition.citationMapping, req.params.passageSelector, req.annotator, req.text),
-      features: util.greek.Features)
+    res.render('edition')

@@ -4,8 +4,8 @@
   "description": "",
   "main": "server.coffee",
   "scripts": {
-    "start": "coffee ./lib/server.coffee",
-    "test": "mocha --recursive --compilers coffee:coffee-script"
+    "start": "coffee --nodejs --prof ./lib/server.coffee",
+    "test": "mocha --prof --recursive --compilers coffee:coffee-script"
   },
   "dependencies": {
     "express"        : "3.2.x",
