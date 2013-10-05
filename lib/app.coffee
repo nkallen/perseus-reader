@@ -3,7 +3,8 @@ libxml = require('libxmljs')
 fs = require('fs')
 path = require('path')
 
-text = require('./routes/text')
+texts = require('./routes/texts')
+lexicons = require('./routes/lexicons')
 
 app = express()
 app.use(express.responseTime())
@@ -30,13 +31,15 @@ app.param('edition', (req, res, next, edition) ->
   else
     next('route'))
 
-app.get('/:group',                [text.loadIndex, text.loadGroup],
-  text.group)
-app.get('/:group/:work',          [text.loadIndex, text.loadGroup, text.loadWork],
-  text.work)
-app.get('/:group/:work/:edition', [text.loadIndex, text.loadGroup, text.loadWork, text.loadEdition, text.loadText, text.loadAnnotator, text.loadSelection],
-  text.edition)
-app.get('/',                      [text.loadIndex],
-  text.index)
+app.get('/texts/:group',                [texts.loadIndex, texts.loadGroup],
+  texts.group)
+app.get('/texts/:group/:work',          [texts.loadIndex, texts.loadGroup, texts.loadWork],
+  texts.work)
+app.get('/texts/:group/:work/:edition', [texts.loadIndex, texts.loadGroup, texts.loadWork, texts.loadEdition, texts.loadText, texts.loadAnnotator, texts.loadSelection],
+  texts.edition)
+app.get('/lexicons/:lexicon',           [lexicons.loadLexicon]
+  lexicons.show)
+app.get('/',                            [texts.loadIndex],
+  texts.index)
 
 module.exports = app
