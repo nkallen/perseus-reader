@@ -24,16 +24,16 @@ module.exports =
     unless res.locals.edition = req.edition = req.ctsIndex.edition(req.params.group, req.params.work, req.params.edition)
       return res.send(404)
 
-    res.locals.urn = req.params.urn = req.edition.urn
+    res.locals.urn = req.urn = req.edition.urn
     next()
 
   loadUrn: (req, res, next) ->
-    unless res.locals.edition = req.edition = req.index.urn(req.params.urn)
+    unless res.locals.edition = req.edition = req.index.urn(req.urn)
       return res.send(404) 
     next()
 
   loadAnnotator: (req, res, next) ->
-    req.app.get('annotatorRepository').urn(req.params.urn, (error, annotator) ->
+    req.app.get('annotatorRepository').urn(req.urn, (error, annotator) ->
       req.annotator =
         if error
           new SimpleAnnotator
@@ -43,14 +43,14 @@ module.exports =
     )
 
   loadText: (req, res, next) ->
-    req.app.get('perseusRepository').urn(req.params.urn, (error, text) ->
+    req.app.get('perseusRepository').urn(req.urn, (error, text) ->
       return res.send(404) if error
       req.text = libxml.parseXml(text)
       next()
     )
 
   loadSelection: (req, res, next) ->
-    annotatedEdition = new AnnotatedEdition(req.edition.citationMapping, req.annotator, req.text)
+    res.locals.annotatedEdition = annotatedEdition = new AnnotatedEdition(req.edition.citationMapping, req.annotator, req.text)
     res.locals.selection = req.selection =
       if req.params.passageSelector
         annotatedEdition.select(req.params.passageSelector)

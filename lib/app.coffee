@@ -37,7 +37,7 @@ app.get('/texts/:group/:work',          [texts.loadIndex, texts.loadGroup, texts
   texts.work)
 app.get('/texts/:group/:work/:edition', [texts.loadIndex, texts.loadGroup, texts.loadWork, texts.loadEdition, texts.loadText, texts.loadAnnotator, texts.loadSelection],
   texts.edition)
-app.get('/lexicons/:lexicon',           [lexicons.loadLexicon]
+app.all('/lexicons/:lexicon',           [lexicons.loadLexicon]
   lexicons.show)
 app.get('/',                            [texts.loadIndex],
   texts.index)

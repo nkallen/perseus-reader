@@ -1,3 +1,7 @@
+compute traces for all of herodotus in its own annotator repository.
+for each token store all possibilities with score
+when clicking on a token, aggregate by lemma and sort by total weight
+
 ###
   update: (req, res) ->
     self = this

@@ -5,10 +5,13 @@ module.exports =
     next()
 
   show: (req, res) ->
+    lemmas = req.query.lemmas || req.body.lemmas
     lemmas =
-      if Array.isArray(req.query.lemmas) then req.query.lemmas
-      else [req.query.lemmas]
-    slice = (req.lexicon[lemma] for lemma in lemmas)
+      if Array.isArray(lemmas) then lemmas
+      else [lemmas]
+    slice = {}
+    for lemma in lemmas
+      slice[lemma] = req.lexicon[lemma]
 
     res.format(
       'application/json': () ->
