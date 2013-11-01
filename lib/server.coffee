@@ -16,12 +16,15 @@ app.configure('development', ->
 
   perseusFileReader =
     readFile: (file, callback) -> fs.readFile(path.join(__dirname, '../vendor/canonical/CTS_XML_TEI/perseus', file), callback)
-  annotatorFileReader =
+  treebankAnnotatorFileReader =
     readFile: (file, callback) -> fs.readFile(path.join(__dirname, '../vendor/treebank/perseus', file), callback)
+  nlpAnnotatorFileReader =
+    readFile: (file, callback) -> fs.readFile(path.join(__dirname, '../vendor/nlp/perseus', file), callback)
 
   app.set('ctsIndex', textIndex.CtsIndex.load(ctsXml))
   app.set('perseusRepository', new textIndex.PerseusRepository(perseusFileReader))
-  app.set('annotatorRepository', new annotator.TreebankAnnotatorRepository(annotatorFileReader))
+  app.set('treebankAnnotatorRepository', new annotator.TreebankAnnotatorRepository(treebankAnnotatorFileReader))
+  app.set('nlpAnnotatorRepository', new annotator.TreebankAnnotatorRepository(nlpAnnotatorFileReader))
   app.set('lexicons', lexicons)
 
   app.listen(process.env.PORT)

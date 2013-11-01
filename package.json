@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.coffee",
   "scripts": {
-    "start": "coffee --nodejs --prof ./lib/server.coffee",
+    "start": "coffee --nodejs --prof --nodejs --expose-gc ./lib/server.coffee",
     "test": "mocha --prof --recursive --compilers coffee:coffee-script"
   },
   "dependencies": {

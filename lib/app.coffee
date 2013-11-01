@@ -3,6 +3,11 @@ libxml = require('libxmljs')
 fs = require('fs')
 path = require('path')
 
+Bundler = require('./bundler')
+bundler = new Bundler(module, require)
+bundler.dependency('../node_modules/perseus-util/lib/greek', 'greek')
+bundler.exclude('../node_modules/perseus-util/node_modules/unorm/lib/unorm')
+
 texts = require('./routes/texts')
 lexicons = require('./routes/lexicons')
 
@@ -21,7 +26,7 @@ app.use((err, req, res, next) ->
 )
 
 app.param('edition', (req, res, next, edition) ->
-  if result = /([\w\s]+):((\d+\.)*\d+)$/.exec(edition)
+  if result = /([\w\s]+):(([^.]+\.)*[^.]+)$/.exec(edition)
     req.params.edition = result[1]
     req.params.passageSelector = result[2]
     next()
@@ -35,11 +40,16 @@ app.get('/texts/:group',                [texts.loadIndex, texts.loadGroup],
   texts.group)
 app.get('/texts/:group/:work',          [texts.loadIndex, texts.loadGroup, texts.loadWork],
   texts.work)
-app.get('/texts/:group/:work/:edition', [texts.loadIndex, texts.loadGroup, texts.loadWork, texts.loadEdition, texts.loadText, texts.loadAnnotator, texts.loadSelection],
+app.get('/texts/:group/:work/:edition', [texts.loadIndex, texts.loadGroup, texts.loadWork, texts.loadEdition, texts.loadText, texts.loadTreebankAnnotator, texts.loadNlpAnnotator, texts.loadAnnotator, texts.loadSelection],
   texts.edition)
 app.all('/lexicons/:lexicon',           [lexicons.loadLexicon]
   lexicons.show)
 app.get('/',                            [texts.loadIndex],
   texts.index)
 
+app.get('/application.js', (req, res) ->
+  res.charset = 'utf-8'
+  res.type('application/javascript')
+  res.end(bundler.toString())
+)
 module.exports = app

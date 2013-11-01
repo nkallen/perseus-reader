@@ -3,6 +3,7 @@ fs = require('fs')
 libxml = require('libxmljs')
 TreebankAnnotator = util.annotator.TreebankAnnotator
 SimpleAnnotator = util.annotator.SimpleAnnotator
+FailoverAnnotator = util.annotator.FailoverAnnotator
 AnnotatedEdition = util.AnnotatedEdition
 
 module.exports =
@@ -32,15 +33,27 @@ module.exports =
       return res.send(404) 
     next()
 
-  loadAnnotator: (req, res, next) ->
-    req.app.get('annotatorRepository').urn(req.urn, (error, annotator) ->
-      req.annotator =
+  loadTreebankAnnotator: (req, res, next) ->
+    req.app.get('treebankAnnotatorRepository').urn(req.urn, (error, annotator) ->
+      req.treebankAnnotator =
         if error
           new SimpleAnnotator
         else
           annotator
       next()
     )
+
+  loadNlpAnnotator: (req, res, next) ->
+    req.app.get('nlpAnnotatorRepository').urn(req.urn, (error, annotator) ->
+      throw error if error
+      req.nlpAnnotator = annotator
+      next()
+    )
+
+  loadAnnotator: (req, res, next) ->
+    # req.annotator = new FailoverAnnotator(req.nlpAnnotator, req.treebankAnnotator)
+    req.annotator = req.nlpAnnotator
+    next()
 
   loadText: (req, res, next) ->
     req.app.get('perseusRepository').urn(req.urn, (error, text) ->
