@@ -6,6 +6,10 @@ body, h1, h2, h3, h4 {
   font-family: 'Cardo', serif;
 }
 
+.affix-top {
+
+}
+
 .highlight {
   margin: -1px -4px -2px;
   padding: 1px 4px 2px;

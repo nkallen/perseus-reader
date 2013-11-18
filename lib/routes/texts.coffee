@@ -33,42 +33,31 @@ module.exports =
       return res.send(404) 
     next()
 
-  loadTreebankAnnotator: (req, res, next) ->
-    req.app.get('treebankAnnotatorRepository').urn(req.urn, (error, annotator) ->
-      req.treebankAnnotator =
-        if error
-          new SimpleAnnotator
-        else
-          annotator
-      next()
-    )
-
-  loadNlpAnnotator: (req, res, next) ->
-    req.app.get('nlpAnnotatorRepository').urn(req.urn, (error, annotator) ->
-      throw error if error
-      req.nlpAnnotator = annotator
-      next()
-    )
-
-  loadAnnotator: (req, res, next) ->
-    # req.annotator = new FailoverAnnotator(req.nlpAnnotator, req.treebankAnnotator)
-    req.annotator = req.nlpAnnotator
-    next()
-
   loadText: (req, res, next) ->
-    req.app.get('perseusRepository').urn(req.urn, (error, text) ->
-      return res.send(404) if error
-      req.text = libxml.parseXml(text)
-      next()
+    req.app.get('cache').get(req.urn,
+      (annotatedEdition) ->
+        res.locals.annotatedEdition = req.annotatedEdition = annotatedEdition
+        next()
+      , (callback) ->
+        req.app.get('treebankAnnotatorRepository').urn(req.urn, (error, treebankAnnotator) ->
+          req.app.get('nlpAnnotatorRepository').urn(req.urn, (error, nlpAnnotator) ->
+            nlpAnnotator ||= new SimpleAnnotator
+            req.app.get('perseusRepository').urn(req.urn, (error, text) ->
+              return res.send(404) if error
+
+              res.locals.annotatedEdition = req.annotatedEdition = annotatedEdition =
+                new AnnotatedEdition(req.edition.citationMapping, nlpAnnotator, libxml.parseXml(text))
+              callback(annotatedEdition)
+              next()
+            )
+          )
+        )
     )
 
   loadSelection: (req, res, next) ->
-    res.locals.annotatedEdition = annotatedEdition = new AnnotatedEdition(req.edition.citationMapping, req.annotator, req.text)
     res.locals.selection = req.selection =
-      if req.params.passageSelector
-        annotatedEdition.select(req.params.passageSelector)
-      else
-        annotatedEdition.selectFirst()
+      if req.params.passageSelector then req.annotatedEdition.select(req.params.passageSelector)
+      else req.annotatedEdition.selectFirst()
     next()
 
   index: (req, res) ->

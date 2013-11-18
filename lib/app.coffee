@@ -3,13 +3,9 @@ libxml = require('libxmljs')
 fs = require('fs')
 path = require('path')
 
-Bundler = require('./bundler')
-bundler = new Bundler(module, require)
-bundler.dependency('../node_modules/perseus-util/lib/greek', 'greek')
-bundler.exclude('../node_modules/perseus-util/node_modules/unorm/lib/unorm')
-
 texts = require('./routes/texts')
 lexicons = require('./routes/lexicons')
+bundler = require('./routes/bundler')
 
 app = express()
 app.use(express.responseTime())
@@ -40,16 +36,13 @@ app.get('/texts/:group',                [texts.loadIndex, texts.loadGroup],
   texts.group)
 app.get('/texts/:group/:work',          [texts.loadIndex, texts.loadGroup, texts.loadWork],
   texts.work)
-app.get('/texts/:group/:work/:edition', [texts.loadIndex, texts.loadGroup, texts.loadWork, texts.loadEdition, texts.loadText, texts.loadTreebankAnnotator, texts.loadNlpAnnotator, texts.loadAnnotator, texts.loadSelection],
+app.get('/texts/:group/:work/:edition', [texts.loadIndex, texts.loadGroup, texts.loadWork, texts.loadEdition, texts.loadText, texts.loadSelection],
   texts.edition)
 app.all('/lexicons/:lexicon',           [lexicons.loadLexicon]
   lexicons.show)
 app.get('/',                            [texts.loadIndex],
   texts.index)
+app.get('/application.js',
+  bundler.show)
 
-app.get('/application.js', (req, res) ->
-  res.charset = 'utf-8'
-  res.type('application/javascript')
-  res.end(bundler.toString())
-)
 module.exports = app
